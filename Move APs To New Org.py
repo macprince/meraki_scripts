@@ -1,0 +1,87 @@
+#!/usr/bin/env python3
+
+import meraki
+import json
+import argparse
+import subprocess
+import logging
+import os.path
+import sys
+import re
+
+import csv
+import pprint
+
+pp = pprint.PrettyPrinter(indent=4)
+
+# Set up argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("--debug",
+                    help="Turns Debug Logging On.",
+                    action="store_true")
+parser.add_argument("--config",
+                    help="Specify path to config.json",
+                    default=os.path.join(sys.path[0],"config.json"))
+
+args = parser.parse_args()
+
+# Set up logging
+level = logging.WARNING
+if args.debug:
+    level = logging.DEBUG
+logging.basicConfig(format='%(asctime)s - %(levelname)s: %(message)s',
+                    datefmt='%Y-%m-%d %I:%M:%S %p',
+                    level=level,
+                    filename=os.path.join(sys.path[0],'meraki_move_APs.log'))
+stdout_logging = logging.StreamHandler()
+stdout_logging.setFormatter(logging.Formatter())
+logging.getLogger().addHandler(stdout_logging)
+
+config = os.path.abspath(args.config)
+try:
+    with open(config) as config_file:
+        settings = json.load(config_file)
+except IOError:
+    logging.error("No config.json file found! Please create one!")
+    sys.exit(2)
+
+# Read in config
+meraki_config = settings['meraki_dashboard']
+
+apikey = meraki_config['api_key']
+dashboard = meraki.DashboardAPI(api_key=apikey, base_url='https://api.meraki.com/api/v1/', log_file_prefix=__file__[:-3], print_console=False)
+
+searchterm = "High School"
+
+orgs = dashboard.organizations.getOrganizations()
+
+old_orgid = next(item for item in orgs if "Legacy" in item['name'])['id']
+new_orgid = next(item for item in orgs if "Huntley" in item['name'])['id']
+
+oldnetworks = dashboard.networks.getOrganizationNetworks(old_orgid)
+newnetworks = dashboard.networks.getOrganizationNetworks(new_orgid)
+
+oldnetworkid = next(item for item in oldnetworks if f"{searchterm} - wireless" in item['name'])['id']
+newnetworkid = next(item for item in newnetworks if f"{searchterm} - wireless" in item['name'])['id']
+
+devices = dashboard.devices.getNetworkDevices(networkId=oldnetworkid)
+
+for d in devices:
+    serial = d['serial']
+    name = d['name']
+    
+    print(f"Removing AP {name} ({serial}) from old network")
+    dashboard.devices.removeNetworkDevice(networkId=oldnetworkid,serial=serial)
+    print(f"Claiming AP {name} ({serial}) into new network")
+    dashboard.devices.claimNetworkDevices(networkId=newnetworkid,serials=[serial])
+    print(f"Assigning properties of AP {name} ({serial}) to new network")
+    dashboard.devices.updateNetworkDevice(networkId=newnetworkid,serial=serial,
+        name=d['name'],
+        # tags=d['tags'],
+        notes=d['notes'],
+        lat=d['lat'],
+        lng=d['lng'],
+        address=d['address'],
+        moveMapMarker="true")
+    print()
+
