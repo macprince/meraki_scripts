@@ -22,6 +22,12 @@ parser.add_argument("--debug",
 parser.add_argument("--config",
                     help="Specify path to config.json",
                     default=os.path.join(sys.path[0],"config.json"))
+parser.add_argument("--network", 
+                    help="Network name as matchable in the Meraki Dashboard",
+                    required=True)
+parser.add_argument("--csv",
+                    help="CSV file of access points to import as replacements",
+                    required=True)
 
 args = parser.parse_args()
 
@@ -57,9 +63,9 @@ orgID = next(item for item in orgs if "Huntley" in item['name'])['id']
 
 #Use our org ID to get the network in question
 networks = dashboard.organizations.getOrganizationNetworks(orgID)
-networkid = next(item for item in networks if "Admin" in item['name'])['id']
+networkid = next(item for item in networks if args.building in item['name'])['id']
 
-with open("Import.csv") as f:
+with open(args.csv) as f:
     reader = csv.DictReader(f)
     data = [r for r in reader]
 
