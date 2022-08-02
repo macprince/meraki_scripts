@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 
-import meraki
 import json
 import argparse
-import subprocess
 import logging
 import os.path
 import sys
-import re
 
+import meraki
 import csv
 import pprint
 
