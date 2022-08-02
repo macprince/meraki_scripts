@@ -63,7 +63,7 @@ orgID = next(item for item in orgs if "Huntley" in item['name'])['id']
 
 #Use our org ID to get the network in question
 networks = dashboard.organizations.getOrganizationNetworks(orgID)
-networkid = next(item for item in networks if args.building in item['name'])['id']
+networkid = next(item for item in networks if args.network in item['name'])['id']
 
 with open(args.csv) as f:
     reader = csv.DictReader(f)
