@@ -16,7 +16,7 @@ pp = pprint.PrettyPrinter(indent=4)
 parser = argparse.ArgumentParser()
 parser.add_argument("--debug",
                     help="Turns Debug Logging On.",
-                    action="store_true")
+                    action="store_false")
 parser.add_argument("--config",
                     help="Specify path to config.json",
                     default=os.path.join(sys.path[0],"config.json"))
