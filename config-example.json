@@ -1,5 +1,6 @@
 {
 	"meraki_dashboard": {
-		"api_key": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+		"api_key": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+		"org_name": "My Meraki Organization Name"
 	}
 }
