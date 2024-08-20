@@ -3,3 +3,4 @@ config.json
 *.log
 *.csv
 .DS_Store
+/.venv
