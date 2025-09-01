@@ -53,7 +53,7 @@ except IOError:
 meraki_config = settings['meraki_dashboard']
 
 apikey = meraki_config['api_key']
-dashboard = meraki.DashboardAPI(api_key=apikey, base_url='https://api.meraki.com/api/v1/', log_file_prefix=__file__[:-3], print_console=False)
+dashboard = meraki.DashboardAPI(api_key=apikey, base_url='https://api.meraki.com/api/v1/', print_console=False, output_log=False)
 
 # Get our organization ID
 orgs = dashboard.organizations.getOrganizations()
