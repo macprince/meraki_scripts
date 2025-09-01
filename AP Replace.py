@@ -8,6 +8,7 @@ import sys
 import meraki
 import pprint
 import gspread
+from gspread_formatting import *
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -19,9 +20,6 @@ parser.add_argument("--debug",
 parser.add_argument("--config",
                     help="Specify path to config.json",
                     default=os.path.join(sys.path[0],"config.json"))
-parser.add_argument("--network", 
-                    help="Network name as matchable in the Meraki Dashboard",
-                    required=True)
 
 args = parser.parse_args()
 
@@ -36,6 +34,7 @@ except IOError:
 
 # Read in config
 meraki_config = settings['meraki_dashboard']
+sheets_config = settings['sheets']
 
 apikey = meraki_config['api_key']
 dashboard = meraki.DashboardAPI(api_key=apikey, base_url='https://api.meraki.com/api/v1/', print_console=False, output_log=False)
@@ -43,10 +42,41 @@ dashboard = meraki.DashboardAPI(api_key=apikey, base_url='https://api.meraki.com
 # Get our organization ID
 orgs = dashboard.organizations.getOrganizations()
 orgID = next(item for item in orgs if meraki_config['org_name'] in item['name'])['id']
+# orgID = next(item for item in orgs if meraki_config['org_name'] in item['name'])['id']
 
-#Use our org ID to get the network in question
 networks = dashboard.organizations.getOrganizationNetworks(orgID)
-networkid = next(item for item in networks if args.network in item['name'])['id']
+
+gc = gspread.service_account()
+wb = gc.open_by_key(sheets_config['spreadsheet_id'])
+sheets = wb.worksheets()
+sheet_titles = [sheet.title for sheet in sheets]
+
+for net in networks:
+    if net['name'] not in sheet_titles:
+        ws = wb.add_worksheet(
+        title=net['name'],
+        rows=300,
+        cols=4
+        )
+    else:
+        ws = wb.worksheet(net['name'])
+        ws.clear()
+
+    ws.update([["Name","Old Serial","New Serial","New Asset"]],'A1:D1')
+    ws.format('A1:D1',{'textFormat': {'bold': True}})
+    set_frozen(ws,rows=1)
+
+    dash_aps = dashboard.organizations.getOrganizationDevices(
+        organizationId=orgID,
+        networkIds=[net['id']],
+        productTypes=["wireless"],
+        perPage=1000,
+        total_pages='all'
+        )
+    output_aps = []
+    for ap in dash_aps:
+        output_aps.append([ap['name'],ap['serial']])
+    ws.insert_rows(output_aps,2)
 
 
 
