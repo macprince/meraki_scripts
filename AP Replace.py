@@ -41,7 +41,7 @@ dashboard = meraki.DashboardAPI(api_key=apikey, base_url='https://api.meraki.com
 
 # Get our organization ID
 orgs = dashboard.organizations.getOrganizations()
-orgID = next(item for item in orgs if meraki_config['org_name'] in item['name'])['id']
+orgID = orgs[0]['id'] # I used to specifically select the org with the correct name, but we haven't had multiple orgs in a while, so I'm lazy
 # orgID = next(item for item in orgs if meraki_config['org_name'] in item['name'])['id']
 
 networks = dashboard.organizations.getOrganizationNetworks(orgID)
