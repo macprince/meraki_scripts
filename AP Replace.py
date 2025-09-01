@@ -7,6 +7,7 @@ import sys
 
 import meraki
 import pprint
+import gspread
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -46,6 +47,8 @@ orgID = next(item for item in orgs if meraki_config['org_name'] in item['name'])
 #Use our org ID to get the network in question
 networks = dashboard.organizations.getOrganizationNetworks(orgID)
 networkid = next(item for item in networks if args.network in item['name'])['id']
+
+
 
 
 # for d in data:
