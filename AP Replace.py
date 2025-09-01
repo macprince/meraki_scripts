@@ -2,12 +2,10 @@
 
 import json
 import argparse
-import logging
 import os.path
 import sys
 
 import meraki
-import csv
 import pprint
 
 pp = pprint.PrettyPrinter(indent=4)
@@ -22,9 +20,6 @@ parser.add_argument("--config",
                     default=os.path.join(sys.path[0],"config.json"))
 parser.add_argument("--network", 
                     help="Network name as matchable in the Meraki Dashboard",
-                    required=True)
-parser.add_argument("--csv",
-                    help="CSV file of access points to import as replacements",
                     required=True)
 
 args = parser.parse_args()
@@ -52,34 +47,31 @@ orgID = next(item for item in orgs if meraki_config['org_name'] in item['name'])
 networks = dashboard.organizations.getOrganizationNetworks(orgID)
 networkid = next(item for item in networks if args.network in item['name'])['id']
 
-with open(args.csv) as f:
-    reader = csv.DictReader(f)
-    data = [r for r in reader]
 
-for d in data:
+# for d in data:
 
-    old_serial = d['Old Serial']
-    new_serial = d['New Serial']
-    new_asset = d['New Asset']
+#     old_serial = d['Old Serial']
+#     new_serial = d['New Serial']
+#     new_asset = d['New Asset']
 
-    # Retrieve information on old AP
-    old_device = dashboard.devices.getDevice(serial=old_serial)
+#     # Retrieve information on old AP
+#     old_device = dashboard.devices.getDevice(serial=old_serial)
 
-    # Claiming new AP by serial
-    dashboard.networks.claimNetworkDevices(networkId=networkid,serials=[new_serial])
-    print(f"{new_serial} added to network")
+#     # Claiming new AP by serial
+#     dashboard.networks.claimNetworkDevices(networkId=networkid,serials=[new_serial])
+#     print(f"{new_serial} added to network")
 
-    dashboard.devices.updateDevice(serial=new_serial,
-       name=old_device['name'],
-       #tags=old_device['tags'],
-       notes=f"Asset: {new_asset}",
-       lat=old_device['lat'],
-       lng=old_device['lng'],
-       address=old_device['address'],
-       moveMapMarker="true")
-    print(f"{new_serial} set to properties of {old_serial}")
+#     dashboard.devices.updateDevice(serial=new_serial,
+#        name=old_device['name'],
+#        #tags=old_device['tags'],
+#        notes=f"Asset: {new_asset}",
+#        lat=old_device['lat'],
+#        lng=old_device['lng'],
+#        address=old_device['address'],
+#        moveMapMarker="true")
+#     print(f"{new_serial} set to properties of {old_serial}")
 
-    old_name = old_device['name']+"-OLD"
-    dashboard.devices.updateDevice(serial=old_serial,name=old_name,suppressprint=True)
-    print(f"{old_serial} renamed to {old_name}")
-    print()
+#     old_name = old_device['name']+"-OLD"
+#     dashboard.devices.updateDevice(serial=old_serial,name=old_name,suppressprint=True)
+#     print(f"{old_serial} renamed to {old_name}")
+#     print()
