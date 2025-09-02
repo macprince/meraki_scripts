@@ -61,9 +61,9 @@ for net in networks:
     else:
         ws = wb.worksheet(net['name'])
         ws.clear()
-
     ws.update([["Name","Old Serial","New Serial","New Asset"]],'A1:D1')
     ws.format('A1:D1',{'textFormat': {'bold': True}})
+    set_column_widths(ws,[ ('A', 160), ('B', 120) ])
     set_frozen(ws,rows=1)
 
     dash_aps = dashboard.organizations.getOrganizationDevices(
@@ -76,7 +76,7 @@ for net in networks:
     output_aps = []
     for ap in dash_aps:
         output_aps.append([ap['name'],ap['serial']])
-    ws.insert_rows(output_aps,2)
+    ws.update(output_aps,"A2:D")
 
 
 
