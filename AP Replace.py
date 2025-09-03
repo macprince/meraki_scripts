@@ -61,9 +61,27 @@ for net in networks:
     else:
         ws = wb.worksheet(net['name'])
         ws.clear()
-    ws.update([["Name","Old Serial","New Serial","New Asset"]],'A1:D1')
-    ws.format('A1:D1',{'textFormat': {'bold': True}})
-    set_column_widths(ws,[ ('A', 160), ('B', 120) ])
+
+    ws.batch_format([
+        {
+            'range': "A1:D1",
+            'format': { 
+                'textFormat': {
+                    'bold': True
+                    }
+                }
+        },
+        {
+            'range': "B2:D",
+            'format': {
+                'textFormat': {
+                    'fontFamily': "Courier New"
+                }
+            }
+        }
+    ])
+
+    set_column_widths(ws,[ ('A', 160), ('B', 120),('C', 120) ])
     set_frozen(ws,rows=1)
 
     dash_aps = dashboard.organizations.getOrganizationDevices(
@@ -73,10 +91,15 @@ for net in networks:
         perPage=1000,
         total_pages='all'
         )
+    dash_aps = sorted(dash_aps,key=lambda x: x['name'])
+    
     output_aps = []
+    output_aps.append(["Name","Old Serial","New Serial","New Asset"])
+
     for ap in dash_aps:
-        output_aps.append([ap['name'],ap['serial']])
-    ws.update(output_aps,"A2:D")
+        output_aps.append([ap['name'],ap['serial'],"",""])
+
+    ws.update(output_aps,"A1:D")
 
 
 
