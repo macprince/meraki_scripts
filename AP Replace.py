@@ -23,7 +23,6 @@ parser.add_argument("--config",
 
 args = parser.parse_args()
 
-
 config = os.path.abspath(args.config)
 try:
     with open(config) as config_file:
@@ -45,13 +44,13 @@ orgID = orgs[0]['id'] # I used to specifically select the org with the correct n
 # orgID = next(item for item in orgs if meraki_config['org_name'] in item['name'])['id']
 
 networks = dashboard.organizations.getOrganizationNetworks(orgID)
+networks = sorted(networks,key=lambda x: x['name'])
 
 gc = gspread.service_account()
 wb = gc.open_by_key(sheets_config['spreadsheet_id'])
 sheets = wb.worksheets()
 sheet_titles = [sheet.title for sheet in sheets]
 
-networks = sorted(networks,key=lambda x: x['name'])
 
 for net in networks:
     if net['name'] not in sheet_titles:
@@ -97,7 +96,6 @@ for net in networks:
     
     output_aps = []
     output_aps.append(["Name","Old Serial","New Serial","New Asset"])
-
     for ap in dash_aps:
         output_aps.append([ap['name'],ap['serial'],"",""])
 
