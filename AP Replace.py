@@ -54,48 +54,51 @@ wb = gc.open_by_key(sheets_config['spreadsheet_id'])
 sheets = wb.worksheets()
 sheet_titles = [sheet.title for sheet in sheets]
 
-if args.mode == "export":
-    for net in networks:
-        if net['name'] not in sheet_titles:
-            ws = wb.add_worksheet(
-            title=net['name'],
-            rows=300,
-            cols=4
-            )
-        else:
-            ws = wb.worksheet(net['name'])
-            ws.clear()
+match args.mode:
+    case "export": 
+        for net in networks:
+            if net['name'] not in sheet_titles:
+                ws = wb.add_worksheet(
+                title=net['name'],
+                rows=300,
+                cols=4
+                )
+            else:
+                ws = wb.worksheet(net['name'])
+                ws.clear()
 
-        ws.batch_format([
-    {"range": "A1:D1", "format": {"textFormat": {"bold": True}}},
-    {"range": "C2:E", "format": {"textFormat": {"fontFamily": "Courier New"}}},
-])
+            ws.batch_format([
+        {"range": "A1:D1", "format": {"textFormat": {"bold": True}}},
+        {"range": "C2:E", "format": {"textFormat": {"fontFamily": "Courier New"}}},
+    ])
 
-        set_column_widths(ws,[ ('A', 160), ('B', 75),('C', 120),('D', 120) ])
-        set_frozen(ws,rows=1)
+            set_column_widths(ws,[ ('A', 160), ('B', 75),('C', 120),('D', 120) ])
+            set_frozen(ws,rows=1)
 
-        dash_aps = dashboard.organizations.getOrganizationDevices(
-            organizationId=orgID,
-            networkIds=[net['id']],
-            productTypes=["wireless"],
-            perPage=1000,
-            total_pages='all'
-            )
-        dash_aps = sorted(dash_aps,key=lambda x: x['name'])
-        
-        output_aps = []
-        output_aps.append(["Name","Old Model","Old Serial","New Serial","New Asset"])
-        for ap in dash_aps:
-            output_aps.append([ap['name'],ap['model'],ap['serial'],"",""])
+            dash_aps = dashboard.organizations.getOrganizationDevices(
+                organizationId=orgID,
+                networkIds=[net['id']],
+                productTypes=["wireless"],
+                perPage=1000,
+                total_pages='all'
+                )
+            dash_aps = sorted(dash_aps,key=lambda x: x['name'])
+            
+            output_aps = []
+            output_aps.append(["Name","Old Model","Old Serial","New Serial","New Asset"])
+            for ap in dash_aps:
+                output_aps.append([ap['name'],ap['model'],ap['serial'],"",""])
 
-        ws.update(output_aps,"A1:E")
+            ws.update(output_aps,"A1:E")
 
-elif args.mode == "replace":
-    print("Replace detected")
-    sheet_titles = [s for s in sheet_titles if "Sheet" not in s]
-else:
-    print("Mode not found, exiting.")
-    sys.exit(1)
+    case "replace":
+        print("Replace detected")
+        sheet_titles = [s for s in sheet_titles if "Sheet" not in s]
+    case "remove":
+        print("Remove detected")
+    case _:
+        print("Mode not found, exiting.")
+        sys.exit(1)
 
 
 
