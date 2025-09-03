@@ -14,6 +14,9 @@ pp = pprint.PrettyPrinter(indent=4)
 
 # Set up argparse
 parser = argparse.ArgumentParser()
+parser.add_argument("mode",
+                    help="export AP data to Sheets, or replace APs into Meraki",
+                    default="export")
 parser.add_argument("--debug",
                     help="Turns Debug Logging On.",
                     action="store_false")
@@ -51,55 +54,59 @@ wb = gc.open_by_key(sheets_config['spreadsheet_id'])
 sheets = wb.worksheets()
 sheet_titles = [sheet.title for sheet in sheets]
 
+if args.mode == "export":
+    for net in networks:
+        if net['name'] not in sheet_titles:
+            ws = wb.add_worksheet(
+            title=net['name'],
+            rows=300,
+            cols=4
+            )
+        else:
+            ws = wb.worksheet(net['name'])
+            ws.clear()
 
-for net in networks:
-    if net['name'] not in sheet_titles:
-        ws = wb.add_worksheet(
-        title=net['name'],
-        rows=300,
-        cols=4
-        )
-    else:
-        ws = wb.worksheet(net['name'])
-        ws.clear()
-
-    ws.batch_format([
-        {
-            'range': "A1:D1",
-            'format': { 
-                'textFormat': {
-                    'bold': True
+        ws.batch_format([
+            {
+                'range': "A1:D1",
+                'format': { 
+                    'textFormat': {
+                        'bold': True
+                        }
+                    }
+            },
+            {
+                'range': "B2:D",
+                'format': {
+                    'textFormat': {
+                        'fontFamily': "Courier New"
                     }
                 }
-        },
-        {
-            'range': "B2:D",
-            'format': {
-                'textFormat': {
-                    'fontFamily': "Courier New"
-                }
             }
-        }
-    ])
+        ])
 
-    set_column_widths(ws,[ ('A', 160), ('B', 120),('C', 120) ])
-    set_frozen(ws,rows=1)
+        set_column_widths(ws,[ ('A', 160), ('B', 120),('C', 120) ])
+        set_frozen(ws,rows=1)
 
-    dash_aps = dashboard.organizations.getOrganizationDevices(
-        organizationId=orgID,
-        networkIds=[net['id']],
-        productTypes=["wireless"],
-        perPage=1000,
-        total_pages='all'
-        )
-    dash_aps = sorted(dash_aps,key=lambda x: x['name'])
-    
-    output_aps = []
-    output_aps.append(["Name","Old Serial","New Serial","New Asset"])
-    for ap in dash_aps:
-        output_aps.append([ap['name'],ap['serial'],"",""])
+        dash_aps = dashboard.organizations.getOrganizationDevices(
+            organizationId=orgID,
+            networkIds=[net['id']],
+            productTypes=["wireless"],
+            perPage=1000,
+            total_pages='all'
+            )
+        dash_aps = sorted(dash_aps,key=lambda x: x['name'])
+        
+        output_aps = []
+        output_aps.append(["Name","Old Serial","New Serial","New Asset"])
+        for ap in dash_aps:
+            output_aps.append([ap['name'],ap['serial'],"",""])
 
-    ws.update(output_aps,"A1:D")
+        ws.update(output_aps,"A1:D")
+
+elif args.mode == "replace":
+    print("Replace detected")
+
 
 
 
