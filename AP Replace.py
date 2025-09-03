@@ -51,6 +51,8 @@ wb = gc.open_by_key(sheets_config['spreadsheet_id'])
 sheets = wb.worksheets()
 sheet_titles = [sheet.title for sheet in sheets]
 
+networks = sorted(networks,key=lambda x: x['name'])
+
 for net in networks:
     if net['name'] not in sheet_titles:
         ws = wb.add_worksheet(
