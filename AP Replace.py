@@ -67,23 +67,9 @@ if args.mode == "export":
             ws.clear()
 
         ws.batch_format([
-            {
-                'range': "A1:D1",
-                'format': { 
-                    'textFormat': {
-                        'bold': True
-                        }
-                    }
-            },
-            {
-                'range': "B2:D",
-                'format': {
-                    'textFormat': {
-                        'fontFamily': "Courier New"
-                    }
-                }
-            }
-        ])
+    {"range": "A1:D1", "format": {"textFormat": {"bold": True}}},
+    {"range": "B2:D", "format": {"textFormat": {"fontFamily": "Courier New"}}},
+])
 
         set_column_widths(ws,[ ('A', 160), ('B', 120),('C', 120) ])
         set_frozen(ws,rows=1)
@@ -106,7 +92,10 @@ if args.mode == "export":
 
 elif args.mode == "replace":
     print("Replace detected")
-
+    sheet_titles = [s for s in sheet_titles if "Sheet" not in s]
+else:
+    print("Mode not found, exiting.")
+    sys.exit(1)
 
 
 
