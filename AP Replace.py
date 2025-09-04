@@ -15,7 +15,7 @@ pp = pprint.PrettyPrinter(indent=4)
 # Set up argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("mode",
-                    help="export AP data to Sheets, or replace APs into Meraki",
+                    help="_export_ AP data to Sheets, _replace_ APs in Meraki, or _remove_ old APs",
                     default="export")
 parser.add_argument("--debug",
                     help="Turns Debug Logging On.",
