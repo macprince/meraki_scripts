@@ -94,9 +94,8 @@ match args.mode:
 
     case "replace":
         print("Replace detected")
-
         network_names_diff = list(set(sheet_titles) & set(network_names))
-
+        replace_nets = [d for d in networks if d['name'] in network_names_diff]
 
     case "remove":
         print("Remove detected")
