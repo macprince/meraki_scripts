@@ -48,11 +48,12 @@ orgID = orgs[0]['id'] # I used to specifically select the org with the correct n
 
 networks = dashboard.organizations.getOrganizationNetworks(orgID)
 networks = sorted(networks,key=lambda x: x['name'])
+network_names = [network['name'] for network in networks]
 
 gc = gspread.service_account()
 wb = gc.open_by_key(sheets_config['spreadsheet_id'])
 sheets = wb.worksheets()
-sheet_titles = [sheet.title for sheet in sheets]
+sheet_titles = [sheet.title for sheet in sheets if "Sheet" not in sheet.title]
 
 match args.mode:
     case "export": 
@@ -93,7 +94,10 @@ match args.mode:
 
     case "replace":
         print("Replace detected")
-        sheet_titles = [s for s in sheet_titles if "Sheet" not in s]
+
+        network_names_diff = list(set(sheet_titles) & set(network_names))
+
+
     case "remove":
         print("Remove detected")
     case _:
