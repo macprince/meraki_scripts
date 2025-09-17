@@ -58,10 +58,19 @@ sheet_titles = [sheet.title for sheet in sheets if "Sheet" not in sheet.title]
 match args.mode:
     case "export": 
         for net in networks:
+            dash_aps = dashboard.organizations.getOrganizationDevices(
+                organizationId=orgID,
+                networkIds=[net['id']],
+                productTypes=["wireless"],
+                perPage=1000,
+                total_pages='all'
+                )
+            dash_aps = sorted(dash_aps,key=lambda x: x['name'])
+
             if net['name'] not in sheet_titles:
                 ws = wb.add_worksheet(
                 title=net['name'],
-                rows=300,
+                rows=len(dash_aps),
                 cols=4
                 )
             else:
@@ -75,15 +84,6 @@ match args.mode:
 
             set_column_widths(ws,[ ('A', 160), ('B', 75),('C', 120),('D', 120) ])
             set_frozen(ws,rows=1)
-
-            dash_aps = dashboard.organizations.getOrganizationDevices(
-                organizationId=orgID,
-                networkIds=[net['id']],
-                productTypes=["wireless"],
-                perPage=1000,
-                total_pages='all'
-                )
-            dash_aps = sorted(dash_aps,key=lambda x: x['name'])
             
             output_aps = []
             output_aps.append(["Name","Old Model","Old Serial","New Serial","New Asset"])
