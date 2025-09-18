@@ -71,16 +71,17 @@ match args.mode:
                 ws = wb.add_worksheet(
                 title=net['name'],
                 rows=len(dash_aps),
-                cols=4
+                cols=5
                 )
             else:
                 ws = wb.worksheet(net['name'])
                 ws.clear()
 
             ws.batch_format([
-        {"range": "A1:D1", "format": {"textFormat": {"bold": True}}},
-        {"range": "C2:E", "format": {"textFormat": {"fontFamily": "Courier New"}}},
-    ])
+                {"range": "E2:E", "format": {"numberFormat": {"type": "TEXT"}}},
+                {"range": "A1:E1", "format": {"textFormat": {"bold": True}}},
+                {"range": "C2:E", "format": {"textFormat": {"fontFamily": "Courier New"}}}
+            ])
 
             set_column_widths(ws,[ ('A', 160), ('B', 75),('C', 120),('D', 120) ])
             set_frozen(ws,rows=1)
