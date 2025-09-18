@@ -77,21 +77,19 @@ match args.mode:
                 ws = wb.worksheet(net['name'])
                 ws.clear()
 
+            output_aps = []
+            output_aps.append(["Name","Old Model","Old Serial","New Serial","New Asset"])
+            for ap in dash_aps:
+                output_aps.append([ap['name'],ap['model'],ap['serial'],"",""])
+            ws.update(output_aps,"A1:E")
+
             ws.batch_format([
                 {"range": "E2:E", "format": {"numberFormat": {"type": "TEXT"}}},
                 {"range": "A1:E1", "format": {"textFormat": {"bold": True}}},
                 {"range": "C2:E", "format": {"textFormat": {"fontFamily": "Courier New"}}}
             ])
-
-            set_column_widths(ws,[ ('A', 160), ('B', 75),('C', 120),('D', 120) ])
+            set_column_widths(ws,[ ('A', 160),('B', 75),('C', 120),('D', 120) ])
             set_frozen(ws,rows=1)
-            
-            output_aps = []
-            output_aps.append(["Name","Old Model","Old Serial","New Serial","New Asset"])
-            for ap in dash_aps:
-                output_aps.append([ap['name'],ap['model'],ap['serial'],"",""])
-
-            ws.update(output_aps,"A1:E")
 
     case "replace":
         print("Replace detected")
