@@ -55,16 +55,18 @@ wb = gc.open_by_key(sheets_config['spreadsheet_id'])
 sheets = wb.worksheets()
 sheet_titles = [sheet.title for sheet in sheets if "Sheet" not in sheet.title]
 
-match args.mode:
-    case "export": 
-        for net in networks:
-            dash_aps = dashboard.organizations.getOrganizationDevices(
+all_aps = dashboard.organizations.getOrganizationDevices(
                 organizationId=orgID,
-                networkIds=[net['id']],
                 productTypes=["wireless"],
                 perPage=1000,
                 total_pages='all'
                 )
+
+match args.mode:
+    case "export": 
+        for net in networks:
+            
+            dash_aps = [ap for ap in all_aps if ap['networkId'] == net['id']]
             dash_aps = sorted(dash_aps,key=lambda x: x['name'])
 
             if net['name'] not in sheet_titles:
