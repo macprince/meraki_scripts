@@ -46,7 +46,10 @@ orgs = dashboard.organizations.getOrganizations()
 orgID = orgs[0]['id'] # I used to specifically select the org with the correct name, but we haven't had multiple orgs in a while, so I'm lazy
 # orgID = next(item for item in orgs if meraki_config['org_name'] in item['name'])['id']
 
-networks = dashboard.organizations.getOrganizationNetworks(orgID)
+networks = dashboard.organizations.getOrganizationNetworks(
+    organizationId=orgID,
+    productTypes=["wireless"],
+    )
 networks = sorted(networks,key=lambda x: x['name'])
 network_names = [network['name'] for network in networks]
 
@@ -56,23 +59,22 @@ sheets = wb.worksheets()
 sheet_titles = [sheet.title for sheet in sheets if "Sheet" not in sheet.title]
 
 all_aps = dashboard.organizations.getOrganizationDevices(
-                organizationId=orgID,
-                productTypes=["wireless"],
-                perPage=1000,
-                total_pages='all'
-                )
+    organizationId=orgID,
+    productTypes=["wireless"],
+    perPage=1000,
+    total_pages='all'
+    )
 
 match args.mode:
     case "export": 
         for net in networks:
-            
-            dash_aps = [ap for ap in all_aps if ap['networkId'] == net['id']]
-            dash_aps = sorted(dash_aps,key=lambda x: x['name'])
+            net_aps = [ap for ap in all_aps if ap['networkId'] == net['id']]
+            net_aps = sorted(net_aps,key=lambda x: x['name'])
 
             if net['name'] not in sheet_titles:
                 ws = wb.add_worksheet(
                 title=net['name'],
-                rows=len(dash_aps),
+                rows=len(net_aps),
                 cols=5
                 )
             else:
@@ -81,7 +83,7 @@ match args.mode:
 
             output_aps = []
             output_aps.append(["Name","Old Model","Old Serial","New Serial","New Asset"])
-            for ap in dash_aps:
+            for ap in net_aps:
                 output_aps.append([ap['name'],ap['model'],ap['serial'],"",""])
             ws.update(output_aps,"A1:E")
 
