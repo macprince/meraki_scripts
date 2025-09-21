@@ -73,9 +73,9 @@ match args.mode:
 
             if net['name'] not in sheet_titles:
                 ws = wb.add_worksheet(
-                title=net['name'],
-                rows=len(net_aps),
-                cols=5
+                    title=net['name'],
+                    rows=len(net_aps),
+                    cols=5
                 )
             else:
                 ws = wb.worksheet(net['name'])
@@ -98,7 +98,13 @@ match args.mode:
     case "replace":
         print("Replace detected")
         network_names_diff = list(set(sheet_titles) & set(network_names))
-        replace_nets = [d for d in networks if d['name'] in network_names_diff]
+        replace_nets = [net for net in networks if net['name'] in network_names_diff]
+        for net in replace_nets:
+            replace_sheet = wb.worksheet(net['name'])
+            replace_data = replace_sheet.get_all_records(numericise_ignore=['all'])
+            for replace_ap in replace_data:
+                old_ap = [ap for ap in all_aps if ap['serial'] == replace_ap['Old Serial']]
+            
 
     case "remove":
         print("Remove detected")
