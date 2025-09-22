@@ -103,7 +103,7 @@ match args.mode:
             replace_sheet = wb.worksheet(net['name'])
             replace_data = replace_sheet.get_all_records(numericise_ignore=['all'])
             for replace_ap in replace_data:
-                old_ap = [ap for ap in all_aps if ap['serial'] == replace_ap['Old Serial']]
+                old_ap = [ap for ap in all_aps if ap['serial'] == replace_ap['Old Serial']][0]
             
 
     case "remove":
